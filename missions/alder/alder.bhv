@@ -10,12 +10,15 @@ Behavior = BHV_SimpleWaypoint
   pwt       = 100
   condition = RETURN = false
   condition = DEPLOY = true
+  
+  condition = (ODOMETRY_DIST < 50)  // line edited is true for distance smaller than 50
+  
   endflag   = RETURN = true
 
-  speed      = 2.0   // meters per second
+  speed      = 12.0   // meters per second
   radius     = 8.0
-  ptx        = 100
-  pty        = -50
+  ptx        = 250
+  pty        = 50
 }
 
 //----------------------------------------------
@@ -23,10 +26,11 @@ Behavior = BHV_Waypoint
 {
   name       = waypt_return
   pwt        = 100
-  condition  = (RETURN = true)
-  condition  = (DEPLOY = true)
+  
+  condition = (RETURN = true) or (ODOMETRY_DIST >= 50) // line edited either is true for return button activated or distance is larger equal 50
+  condition = DEPLOY = true // line edited is also true when deploy button is activated
 
-  speed      = 2.0
+  speed      = 18.5
   radius     = 8.0
   point      = 0,0
 }

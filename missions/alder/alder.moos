@@ -20,7 +20,7 @@ ProcessConfig = ANTLER
   Run = pMarineViewer	@ NewConsole = false
   Run = uProcessWatch @ NewConsole = false
   Run = pHelmIvP      @ NewConsole = false
-  //Run = pOdometry     @ NewConsole = false
+  Run = pOdometry     @ NewConsole = false  // line edited to run the program, but don't open a new terminal 
 }
 
 //------------------------------------------
@@ -119,12 +119,13 @@ ProcessConfig = pMarineViewer
   set_pan_x            = -90
   set_pan_y            = -280
   zoom                 = 0.65
+  
+  scope = ODOMETRY_DIST // Line edited to include the distance in the User Interface
+  
   vehicle_shape_scale  = 1.5
   hash_delta           = 50
   hash_shade           = 0.4
   hash_viewable        = true
-
-  scope = ODOMETRY_DIST
 
    // Appcast configuration
   appcast_height       = 75
