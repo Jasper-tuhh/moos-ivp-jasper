@@ -198,22 +198,17 @@ ProcessConfig = pMarineViewer
   button_three = SLOWER # WPT_UPDATE=speed=1.5
   button_four = FASTER # WPT_UPDATE=speed=3.5
 
-  action  = MENU_KEY=deploy # DEPLOY = true # RETURN = false
-  action+ = MENU_KEY=deploy # MOOS_MANUAL_OVERRIDE=false
+  action  = menu_key=deploy # DEPLOY=true # RETURN=false
+  action+ = menu_key=deploy # MOOS_MANUAL_OVERRIDE=false
+
   action  = RETURN=true
-  action+  = UPDATES_RETURN=speed=1.4
-  
-  action  = menu_key=deploy_alpha # DEPLOY_alpha=true # RETURN_alpha=false
-  action+ = menu_key=deploy_alpha # MOOS_MANUAL_OVERRIDE=false
 
-  action  = menu_key=return_alpha # RETURN_alpha=true
-  action+ = menu_key=return_alpha # DEPLOY_alpha=false
+  action  = menu_key=deploy_alpha # DEPLOY_alpha=true # RETURN_alpha=false # MOOS_MANUAL_OVERRIDE=false
+  action+ = menu_key=deploy_bravo # DEPLOY_bravo=true # RETURN_bravo=false # MOOS_MANUAL_OVERRIDE=false
 
-  action  = menu_key=deploy_bravo # DEPLOY_bravo=true # RETURN_bravo=false
-  action+ = menu_key=deploy_bravo # MOOS_MANUAL_OVERRIDE=false
-
-  action  = menu_key=return_bravo # RETURN_bravo=true
-  action  = menu_key=return_bravo # DEPLOY_bravo=false
+  action  = menu_key=return_alpha # RETURN_alpha=true # MOOS_MANUAL_OVERRIDE=false
+  action  = menu_key=return_bravo # RETURN_bravo=true # MOOS_MANUAL_OVERRIDE=false
+  action+ = UPDATES_RETURN=speed=1.4
 }
 
 //------------------------------------------
@@ -251,6 +246,5 @@ output = src_name = MOOS_MANUAL_OVERRIDE, route=localhost:8201
 
 output = src_name = DEPLOY_bravo, route=localhost:8201
 output = src_name = RETURN_bravo, route=localhost:8201
-
 
 }
