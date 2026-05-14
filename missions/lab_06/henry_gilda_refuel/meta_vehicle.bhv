@@ -93,10 +93,28 @@ Behavior = BHV_Timer
    duration     = 60             
    
    duration_reset = REFUEL_NEEDED = true
+   perpetual = true
+   
    endflag      = REFUEL_NEEDED = false 
    endflag      = LOITER = true 
+
    updates      = TIMER_UPDATES        
 
  }
+ 
+ Behavior = BHV_Waypoint
+{
+  name      = waypt_refuel
+  pwt       = 100
+  condition = REFUEL_NEEDED = true
+  perpetual = true
+
+      speed = 1.3
+     radius = 3.0
+  nm_radius = 15.0
+     points = start
+       lead = 8
+}
+
 
 
