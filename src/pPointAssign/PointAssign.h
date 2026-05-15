@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <string>
-
+#include "XYPoint.h"
 #include "MOOS/libMOOS/Thirdparty/AppCasting/AppCastingMOOSApp.h"
 
 class PointAssign : public AppCastingMOOSApp
@@ -34,7 +34,7 @@ class PointAssign : public AppCastingMOOSApp
 
  private: // Configuration variables
    std::vector<XYPoint> m_points;
-   std::vector<string>  m_vehicle_names;
+   std::vector<std::string>  m_vehicle_names;
 
  private: // State variables
    bool m_firstpoint_received;
