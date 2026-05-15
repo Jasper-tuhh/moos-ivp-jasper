@@ -8,6 +8,9 @@
 #ifndef PointAssign_HEADER
 #define PointAssign_HEADER
 
+#include <vector>
+#include <string>
+
 #include "MOOS/libMOOS/Thirdparty/AppCasting/AppCastingMOOSApp.h"
 
 class PointAssign : public AppCastingMOOSApp
@@ -27,10 +30,11 @@ class PointAssign : public AppCastingMOOSApp
 
  protected:
    void registerVariables();
+   void postViewPoint(double x, double y, std::string label, std::string color);
 
  private: // Configuration variables
-   vector<XYPoint> m_points;
-   vector<string>  m_vehicle_names;
+   std::vector<XYPoint> m_points;
+   std::vector<string>  m_vehicle_names;
 
  private: // State variables
    bool m_firstpoint_received;

@@ -51,8 +51,8 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     bool   mstr  = msg.IsString();
 #endif
 
-    if(key == "VISIT_POINT") {
-      string sval = msg.GetString();
+      if(key == "VISIT_POINT") {
+       string sval = msg.GetString();
       
       if(sval == "firstpoint") {
         m_firstpoint_received = true;
@@ -79,7 +79,8 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     Notify("VISIT_POINT_" + toupper(vname), msg_out);
     
     postViewPoint(x, y, idstr, "yellow");
-
+    }
+   }
      else if(key != "APPCAST_REQ") // handled by AppCastingMOOSApp
        reportRunWarning("Unhandled Mail: " + key);
    }
