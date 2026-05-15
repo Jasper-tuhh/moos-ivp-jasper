@@ -71,12 +71,12 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     double x = stod(xstr);
     double y = stod(ystr);
     
-    int v = m_assign_index % m_vehicle_names.size();
+    int v = m_assign_index % 2;
     string vname = m_vehicle_names[v];
     m_assign_index++;
     
-    string msg_out = "x=" + xstr + ",y=" + ystr + ",id=" + idstr;
-    Notify("VISIT_POINT_" + toupper(vname), msg_out);
+    string msg_out = "points=" + xstr + "," + ystr;
+    Notify("VISIT_POINT_ALL", msg_out);
     
     postViewPoint(x, y, idstr, "yellow");
     }
@@ -143,7 +143,6 @@ bool PointAssign::OnStartUp()
 
     if(!handled)
       reportUnhandledConfigWarning(orig);
-
   }
   
   registerVariables();	
