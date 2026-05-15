@@ -108,7 +108,7 @@ Behavior = BHV_Timer
   condition = REFUEL_NEEDED = true
   perpetual = true
 
-      speed = 3.5
+      speed = 1.5
      radius = 3.0
   nm_radius = 15.0
      points = start

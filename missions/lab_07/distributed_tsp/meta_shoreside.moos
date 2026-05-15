@@ -119,14 +119,20 @@ ProcessConfig = pMarineViewer
  ProcessConfig = uTimerScript                                    
  {                                                               
    rand_var = varname=X_VAL, min=-25, max=200, key=at_post, snap=1
-   rand_var = varname=Y_VAL, min=-25, max=-175, key=at_post, snap=1
+   rand_var = varname=Y_VAL, min=-175, max=-20, key=at_post, snap=1
 
-   event = var=VISIT_POINT_VNAME, val = "firstpoint", time=0
-   event = var=VISIT_POINT_VNAME, val="x=$[X_VAL],y=$[Y_VAL], id=$[TCOUNT]", time=0, amt=100
-   event = var=VISIT_POINT_VNAME, val = "lastpoint", time=0
+   event = var=VISIT_POINT, val = "firstpoint", time=0
+   event = var=VISIT_POINT, val="x=$[X_VAL],y=$[Y_VAL], id=$[TCOUNT]", time=0.1, amt=100
+   event = var=VISIT_POINT, val = "lastpoint", time=0
  }  
  
+//--------------------------------------------------------
+// pPointAssign Config Block
+ ProcessConfig = pPointAssign
+{
+  AppTick   = 4
+  CommsTick = 4
 
-
-
-
+  vehicle_name = henry
+  vehicle_name = gilda
+}
