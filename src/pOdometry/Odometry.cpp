@@ -194,6 +194,8 @@ bool Odometry::buildReport()
   actab.addHeaderLines();
   actab << "one" << "two" << "three" << "four";
   m_msgs << actab.getFormattedString();
+  
+  m_msgs << "Total Distance Traveled: " << m_total_distance << endl;
 
   return(true);
 }
