@@ -17,6 +17,9 @@ using namespace std;
 
 PointAssign::PointAssign()
 {
+  m_firstpoint_received = false;
+  m_lastpoint_received  = false;
+  m_assign_index        = 0;
 }
 
 //---------------------------------------------------------
@@ -48,8 +51,34 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     bool   mstr  = msg.IsString();
 #endif
 
-     if(key == "FOO") 
-       cout << "great!";
+    if(key == "VISIT_POINT") {
+      string sval = msg.GetString();
+      
+      if(sval == "firstpoint") {
+        m_firstpoint_received = true;
+        m_points.clear();
+        m_assign_index = 0;
+      }
+      else if(sval == "lastpoint") {
+        m_lastpoint_received = true;
+      }
+      else {
+       
+    string xstr = tokStringParse(sval, "x", ',', '=');
+    string ystr = tokStringParse(sval, "y", ',', '=');
+    string idstr = tokStringParse(sval, "id", ',', '=');
+    
+    double x = stod(xstr);
+    double y = stod(ystr);
+    
+    int v = m_assign_index % m_vehicle_names.size();
+    string vname = m_vehicle_names[v];
+    m_assign_index++;
+    
+    string msg_out = "x=" + xstr + ",y=" + ystr + ",id=" + idstr;
+    Notify("VISIT_POINT_" + toupper(vname), msg_out);
+    
+    postViewPoint(x, y, idstr, "yellow");
 
      else if(key != "APPCAST_REQ") // handled by AppCastingMOOSApp
        reportRunWarning("Unhandled Mail: " + key);
@@ -106,6 +135,10 @@ bool PointAssign::OnStartUp()
     else if(param == "bar") {
       handled = true;
     }
+    if(param == "vehicle_name") {
+    m_vehicle_names.push_back(value);
+    handled = true;
+    }
 
     if(!handled)
       reportUnhandledConfigWarning(orig);
@@ -122,9 +155,19 @@ bool PointAssign::OnStartUp()
 void PointAssign::registerVariables()
 {
   AppCastingMOOSApp::RegisterVariables();
-  // Register("FOOBAR", 0);
+  Register("VISIT_POINT", 0);
 }
 
+void PointAssign::postViewPoint(double x, double y, string label, string color)
+ {
+   XYPoint point(x, y);
+   point.set_label(label);
+   point.set_color("vertex", color);  // yellow is handy on dark screen 
+   point.set_param("vertex_size", "4");
+
+   string spec = point.get_spec();    // gets the string representation of a point
+   Notify("VIEW_POINT", spec);
+ }
 
 //------------------------------------------------------------
 // Procedure: buildReport()

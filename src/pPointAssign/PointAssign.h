@@ -29,8 +29,13 @@ class PointAssign : public AppCastingMOOSApp
    void registerVariables();
 
  private: // Configuration variables
+   vector<XYPoint> m_points;
+   vector<string>  m_vehicle_names;
 
  private: // State variables
+   bool m_firstpoint_received;
+   bool m_lastpoint_received;
+   int  m_assign_index;           
 };
 
 #endif 

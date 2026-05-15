@@ -22,6 +22,7 @@ Processconfig = ANTLER
   Run = uFldShoreBroker @ NewConsole = false
   Run = pRealm          @ NewConsole = false
   Run = uTimerScript    @ NewConsole = false
+  Run = pPointAssign    @ NewConsole = false
 }
 
 #include plugs.moos <pShare>
@@ -40,6 +41,7 @@ ProcessConfig = uFldShoreBroker
   qbridge  = REFUEL_NEEDED, LOITER
   qbridge  = STATION_KEEP, APPCAST_REQ
   qbridge  = MOOS_MANUAL_OVERRIDE
+  qbridge  = VISIT_POINT
 
   bridge   = src=RETURN_ALL, alias=RETURN
   bridge   = src=RETURN_$V,  alias=RETURN
@@ -62,6 +64,8 @@ ProcessConfig = pLogger
   // Log it all!!!!!
   LogAuxSrc = true
   WildCardLogging = true 
+  
+  Log = VISIT_POINT @ 0 nosync
 
   CompressAlogs = false
 }
@@ -114,12 +118,12 @@ ProcessConfig = pMarineViewer
 
  ProcessConfig = uTimerScript                                    
  {                                                               
-   x_coord    = varname= RND_VAL, min=-25, max=200, key=at_post, snap=0.1
-   y_coord    = varname= RND_VAL, min=-25, max=-175, key=at_post, snap=0.1
+   rand_var = varname=X_VAL, min=-25, max=200, key=at_post, snap=1
+   rand_var = varname=Y_VAL, min=-25, max=-175, key=at_post, snap=1
 
-   event = var=REPORT, val = "firstpoint", time=0
-   event = var=REPORT, val="x=$[x_coord],y=$[y_coord], unique_id=$[TCOUNT]", time=0, amt=100
-   event = var=REPORT, val = "lastpoint", time=0
+   event = var=VISIT_POINT_VNAME, val = "firstpoint", time=0
+   event = var=VISIT_POINT_VNAME, val="x=$[X_VAL],y=$[Y_VAL], id=$[TCOUNT]", time=0, amt=100
+   event = var=VISIT_POINT_VNAME, val = "lastpoint", time=0
  }  
  
 
