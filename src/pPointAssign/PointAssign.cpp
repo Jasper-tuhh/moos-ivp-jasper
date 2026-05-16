@@ -56,7 +56,7 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
       
       if(sval == "firstpoint") {
         m_firstpoint_received = true;
-        m_points.clear();
+        m_view_points.clear();
         m_assign_index = 0;
       }
       else if(sval == "lastpoint") {
@@ -71,7 +71,10 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     double x = stod(xstr);
     double y = stod(ystr);
     
-    int v = m_assign_index % 2;
+    if(m_vehicle_names.size() == 0)
+      return(true);
+
+    int v = m_assign_index % m_vehicle_names.size();
     string vname = m_vehicle_names[v];
     m_assign_index++;
     
@@ -83,8 +86,13 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
       color = "cyan";
 
     string msg_out = "x=" + xstr + ",y=" + ystr + ",id=" + idstr;
-    Notify("VISIT_POINT_" + toupper(vname), msg_out);
-    postViewPoint(x, y, idstr, color);
+    string moos_var = "VISIT_POINT_" + toupperString(vname);
+  Notify(moos_var, msg_out);
+    point.set_label(idstr);
+    point.set_color("vertex", color);
+    point.set_param("vertex_size", "4");
+
+    m_view_points.push_back(point);
     }
    }
      else if(key != "APPCAST_REQ") // handled by AppCastingMOOSApp
@@ -110,7 +118,11 @@ bool PointAssign::OnConnectToServer()
 bool PointAssign::Iterate()
 {
   AppCastingMOOSApp::Iterate();
-  // Do your thing here!
+
+  for(unsigned int i=0; i<m_view_points.size(); i++) {
+    Notify("VIEW_POINT", m_view_points[i].get_spec());
+  }
+
   AppCastingMOOSApp::PostReport();
   return(true);
 }

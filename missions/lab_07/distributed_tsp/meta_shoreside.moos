@@ -13,6 +13,7 @@ Processconfig = ANTLER
   MSBetweenLaunches = 100
 
   Run = MOOSDB          @ NewConsole = false
+  Run = pPointAssign    @ NewConsole = false
   Run = uProcessWatch   @ NewConsole = false
   Run = pRealm          @ NewConsole = false
   Run = pMarineViewer   @ NewConsole = false
@@ -21,7 +22,6 @@ Processconfig = ANTLER
   Run = pHostInfo       @ NewConsole = false
   Run = uFldShoreBroker @ NewConsole = false
   Run = uTimerScript    @ NewConsole = false
-  Run = pPointAssign    @ NewConsole = false
 }
 
 #include plugs.moos <pShare>
@@ -135,7 +135,7 @@ ProcessConfig = pRealm
   AppTick   = 10
   CommsTick = 10
 
-  hist var = VISIT POINT
+  hist_var = VISIT_POINT
 }
 //--------------------------------------------------------
 // pPointAssign Config Block
