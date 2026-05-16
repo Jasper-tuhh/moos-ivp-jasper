@@ -82,7 +82,7 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     else if(vname == "gilda")
       color = "cyan";
 
-    string msg_out = "points=" + xstr + "," + ystr;
+    string msg_out = "x=" + xstr + ",y=" + ystr + ",id=" + idstr;
     Notify("VISIT_POINT_" + toupper(vname), msg_out);
     postViewPoint(x, y, idstr, color);
     }
