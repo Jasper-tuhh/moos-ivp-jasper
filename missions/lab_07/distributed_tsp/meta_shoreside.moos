@@ -40,8 +40,11 @@ ProcessConfig = uFldShoreBroker
   qbridge  = REFUEL_NEEDED, LOITER
   qbridge  = STATION_KEEP, APPCAST_REQ
   qbridge  = MOOS_MANUAL_OVERRIDE
+  
   qbridge  = VISIT_POINT
-
+  bridge = src= VISIT_POINT_HENRY, alias=VISIT_POINT
+  bridge = src= VISIT_POINT_GILDA, alias=VISIT_POINT
+  
   bridge   = src=RETURN_ALL, alias=RETURN
   bridge   = src=RETURN_$V,  alias=RETURN
 }
@@ -124,7 +127,16 @@ ProcessConfig = pMarineViewer
    event = var=VISIT_POINT, val="x=$[X_VAL],y=$[Y_VAL], id=$[TCOUNT]", time=0.1, amt=100
    event = var=VISIT_POINT, val = "lastpoint", time=11
  }  
- 
+ //--------------------------------------------------
+// pRealm Config Block
+	
+ProcessConfig = pRealm
+{
+  AppTick   = 10
+  CommsTick = 10
+
+  hist var = VISIT POINT
+}
 //--------------------------------------------------------
 // pPointAssign Config Block
  ProcessConfig = pPointAssign

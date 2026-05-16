@@ -13,7 +13,6 @@ Processconfig = ANTLER
   MSBetweenLaunches = 50
    
   Run = MOOSDB          @ NewConsole = false
-  Run = pRealm          @ NewConsole = false
   Run = uSimMarineV22   @ NewConsole = false
   Run = pLogger         @ NewConsole = false
   Run = pNodeReporter   @ NewConsole = false
@@ -147,4 +146,14 @@ ProcessConfig = pLogger
   WildCardLogging = true 
 
   CompressAlogs = false
+}
+//--------------------------------------------------
+// pRealm Config Block
+	
+ProcessConfig = pRealm
+{
+  AppTick   = 10
+  CommsTick = 10
+
+  hist var = VISIT POINT
 }
