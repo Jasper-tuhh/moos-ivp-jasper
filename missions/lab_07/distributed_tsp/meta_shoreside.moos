@@ -42,7 +42,7 @@ ProcessConfig = uFldShoreBroker
   qbridge = APPCAST_REQ
   qbridge = MOOS_MANUAL_OVERRIDE
 
-  bridge  = src=VISIT_POINT_$V, alias=VISIT_POINT
+  qbridge = VISIT_POINT, WPT_UPDATE
 
   bridge  = src=RETURN_ALL, alias=RETURN
   bridge  = src=RETURN_$V,  alias=RETURN

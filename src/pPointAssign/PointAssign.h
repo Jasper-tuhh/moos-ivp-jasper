@@ -40,7 +40,8 @@ class PointAssign : public AppCastingMOOSApp
  private: // State variables
    bool m_firstpoint_received;
    bool m_lastpoint_received;
-   int  m_assign_index;           
+   int  m_assign_index;
+   bool m_assign_by_region;
 };
 
 #endif 
