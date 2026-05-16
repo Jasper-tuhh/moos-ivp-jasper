@@ -75,10 +75,16 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     string vname = m_vehicle_names[v];
     m_assign_index++;
     
-    string msg_out = "points=" + xstr + "," + ystr;
-    Notify("VISIT_POINT_ALL", msg_out);
+    string color = "yellow";  // default
     
-    postViewPoint(x, y, idstr, "yellow");
+    if(vname == "henry")
+      color = "yellow";
+    else if(vname == "gilda")
+      color = "cyan";
+
+    string msg_out = "points=" + xstr + "," + ystr;
+    Notify("VISIT_POINT_" + toupper(vname), msg_out);
+    postViewPoint(x, y, idstr, color);
     }
    }
      else if(key != "APPCAST_REQ") // handled by AppCastingMOOSApp
@@ -172,18 +178,25 @@ void PointAssign::postViewPoint(double x, double y, string label, string color)
 //------------------------------------------------------------
 // Procedure: buildReport()
 
-bool PointAssign::buildReport() 
+bool PointAssign::buildReport()
 {
-  m_msgs << "============================================" << endl;
-  m_msgs << "File:                                       " << endl;
-  m_msgs << "============================================" << endl;
+  m_msgs << "====================================" << endl;
+  m_msgs << "Points received: " << m_assign_index  << endl;
+  m_msgs << "First point received: " << m_firstpoint_received << endl;
+  m_msgs << "Last point received:  " << m_lastpoint_received  << endl;
+  m_msgs << "====================================" << endl;
 
-  ACTable actab(4);
-  actab << "Alpha | Bravo | Charlie | Delta";
+  ACTable actab(2);
+  actab << "Vehicle | Points Assigned";
   actab.addHeaderLines();
-  actab << "one" << "two" << "three" << "four";
-  m_msgs << actab.getFormattedString();
 
+  for(int i=0; i<m_vehicle_names.size(); i++) {
+    int count = 0;
+    for(int j=i; j<m_assign_index; j+=m_vehicle_names.size())
+      count++;
+    actab << m_vehicle_names[i] << count;
+  }
+  m_msgs << actab.getFormattedString();
   return(true);
 }
 
