@@ -6,11 +6,22 @@
 /************************************************************/
 
 #include <iterator>
+#include <algorithm>
+#include <cctype>
+#include <string>
+#include "XYPoint.h"
 #include "MBUtils.h"
 #include "ACTable.h"
 #include "PointAssign.h"
 
 using namespace std;
+
+std::string to_upper(std::string s)
+{
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
+    return s;
+}
 
 //---------------------------------------------------------
 // Constructor()
@@ -30,78 +41,69 @@ PointAssign::~PointAssign()
 }
 
 //---------------------------------------------------------
-// Procedure: OnNewMail()
-
 bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
 {
   AppCastingMOOSApp::OnNewMail(NewMail);
-
   MOOSMSG_LIST::iterator p;
   for(p=NewMail.begin(); p!=NewMail.end(); p++) {
     CMOOSMsg &msg = *p;
     string key    = msg.GetKey();
-
-#if 0 // Keep these around just for template
-    string comm  = msg.GetCommunity();
-    double dval  = msg.GetDouble();
-    string sval  = msg.GetString(); 
-    string msrc  = msg.GetSource();
-    double mtime = msg.GetTime();
-    bool   mdbl  = msg.IsDouble();
-    bool   mstr  = msg.IsString();
-#endif
-
+      #if 0      // Keep these around just for template
+      string comm  = msg.GetCommunity();
+      double dval  = msg.GetDouble();
+      string sval  = msg.GetString(); 
+      string msrc  = msg.GetSource();
+      double mtime = msg.GetTime();
+      bool   mdbl  = msg.IsDouble();
+      bool   mstr  = msg.IsString();
+      #endif
       if(key == "VISIT_POINT") {
-       string sval = msg.GetString();
-      
-      if(sval == "firstpoint") {
-        m_firstpoint_received = true;
-        m_view_points.clear();
-        m_assign_index = 0;
+        string sval = msg.GetString();
+        if(sval == "firstpoint") {
+          m_firstpoint_received = true;
+          m_view_points.clear();
+          m_assign_index = 0;
+        }
+        else if(sval == "lastpoint") {
+          m_lastpoint_received = true;
+        }
+        else {
+          string xstr = tokStringParse(sval, "x", ',', '=');
+          string ystr = tokStringParse(sval, "y", ',', '=');
+          string idstr = tokStringParse(sval, "id", ',', '=');
+
+          double x = stod(xstr);
+          double y = stod(ystr);
+          int v = m_assign_index % m_vehicle_names.size();
+          string vname = m_vehicle_names[v];
+          m_assign_index++;
+
+          string color = "yellow";
+          string moos_var = "VISIT_POINT_HENRY";
+
+          if(vname == "henry") {
+            color = "yellow";
+            moos_var = "VISIT_POINT_HENRY";
+          }
+          else if(vname == "gilda") {
+            color = "cyan";
+            moos_var = "VISIT_POINT_GILDA";
+          }
+          string msg_out = "x=" + xstr + ",y=" + ystr + ",id=" + idstr;
+          Notify(moos_var, msg_out);
+          XYPoint point(x, y);
+          point.set_label(idstr);
+          point.set_color("vertex", color);
+          point.set_param("vertex_size", "4");
+          m_view_points.push_back(point);
+        }
       }
-      else if(sval == "lastpoint") {
-        m_lastpoint_received = true;
-      }
-      else {
-       
-    string xstr = tokStringParse(sval, "x", ',', '=');
-    string ystr = tokStringParse(sval, "y", ',', '=');
-    string idstr = tokStringParse(sval, "id", ',', '=');
-    
-    double x = stod(xstr);
-    double y = stod(ystr);
-    
-    if(m_vehicle_names.size() == 0)
-      return(true);
+      else if(key != "APPCAST_REQ") // handled by AppCastingMOOSApp
+        reportRunWarning("Unhandled Mail: " + key);
+  }
 
-    int v = m_assign_index % m_vehicle_names.size();
-    string vname = m_vehicle_names[v];
-    m_assign_index++;
-    
-    string color = "yellow";  // default
-    
-    if(vname == "henry")
-      color = "yellow";
-    else if(vname == "gilda")
-      color = "cyan";
-
-    string msg_out = "x=" + xstr + ",y=" + ystr + ",id=" + idstr;
-    string moos_var = "VISIT_POINT_" + toupperString(vname);
-  Notify(moos_var, msg_out);
-    point.set_label(idstr);
-    point.set_color("vertex", color);
-    point.set_param("vertex_size", "4");
-
-    m_view_points.push_back(point);
-    }
-   }
-     else if(key != "APPCAST_REQ") // handled by AppCastingMOOSApp
-       reportRunWarning("Unhandled Mail: " + key);
-   }
-	
-   return(true);
+  return(true);
 }
-
 //---------------------------------------------------------
 // Procedure: OnConnectToServer()
 
@@ -137,26 +139,19 @@ bool PointAssign::OnStartUp()
 
   STRING_LIST sParams;
   m_MissionReader.EnableVerbatimQuoting(false);
+
   if(!m_MissionReader.GetConfiguration(GetAppName(), sParams))
     reportConfigWarning("No config block found for " + GetAppName());
 
-  STRING_LIST::iterator p;
-  for(p=sParams.begin(); p!=sParams.end(); p++) {
-    string orig  = *p;
-    string line  = *p;
-    string param = tolower(biteStringX(line, '='));
-    string value = line;
-
+  for(string s : sParams) {
+    string orig  = s;
+    string param = biteStringX(s, '=');
+    string value = s;
     bool handled = false;
-    if(param == "foo") {
-      handled = true;
-    }
-    else if(param == "bar") {
-      handled = true;
-    }
+
     if(param == "vehicle_name") {
-    m_vehicle_names.push_back(value);
-    handled = true;
+      m_vehicle_names.push_back(value);
+      handled = true;
     }
 
     if(!handled)
@@ -180,10 +175,10 @@ void PointAssign::postViewPoint(double x, double y, string label, string color)
  {
    XYPoint point(x, y);
    point.set_label(label);
-   point.set_color("vertex", color);  // yellow is handy on dark screen 
+   point.set_color("vertex", color);
    point.set_param("vertex_size", "4");
 
-   string spec = point.get_spec();    // gets the string representation of a point
+   string spec = point.get_spec();
    Notify("VIEW_POINT", spec);
  }
 
@@ -211,7 +206,3 @@ bool PointAssign::buildReport()
   m_msgs << actab.getFormattedString();
   return(true);
 }
-
-
-
-

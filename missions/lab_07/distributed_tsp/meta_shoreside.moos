@@ -36,17 +36,16 @@ ProcessConfig = uFldShoreBroker
   AppTick   = 1
   CommsTick = 1
 
-  qbridge  = DEPLOY, NODE_REPORT
-  qbridge  = REFUEL_NEEDED, LOITER
-  qbridge  = STATION_KEEP, APPCAST_REQ
-  qbridge  = MOOS_MANUAL_OVERRIDE
-  
-  qbridge  = VISIT_POINT
-  bridge = src= VISIT_POINT_HENRY, alias=VISIT_POINT
-  bridge = src= VISIT_POINT_GILDA, alias=VISIT_POINT
-  
-  bridge   = src=RETURN_ALL, alias=RETURN
-  bridge   = src=RETURN_$V,  alias=RETURN
+  qbridge = DEPLOY
+  qbridge = NODE_REPORT
+  qbridge = NODE_MESSAGE
+  qbridge = APPCAST_REQ
+  qbridge = MOOS_MANUAL_OVERRIDE
+
+  bridge  = src=VISIT_POINT_$V, alias=VISIT_POINT
+
+  bridge  = src=RETURN_ALL, alias=RETURN
+  bridge  = src=RETURN_$V,  alias=RETURN
 }
 
 //--------------------------------------------------
@@ -118,16 +117,16 @@ ProcessConfig = pMarineViewer
 //--------------------------------------------------------
 // uTimerScript Config Block
 
- ProcessConfig = uTimerScript                                    
- {                                                               
-   rand_var = varname=X_VAL, min=-25, max=200, key=at_post, snap=0.1
-   rand_var = varname=Y_VAL, min=-175, max=-20, key=at_post, snap=0.1
+ProcessConfig = uTimerScript
+{
+  rand_var = varname=X_VAL, min=-25, max=200, key=at_post, snap=0.1
+  rand_var = varname=Y_VAL, min=-175, max=-20, key=at_post, snap=0.1
 
-   event = var=VISIT_POINT, val = "firstpoint", time=1
-   event = var=VISIT_POINT, val="x=$[X_VAL],y=$[Y_VAL], id=$[TCOUNT]", time=1.1, amt=100
-   event = var=VISIT_POINT, val = "lastpoint", time=1.2
- }  
- //--------------------------------------------------
+  event = var=VISIT_POINT, val="firstpoint", time=1
+  event = var=VISIT_POINT, val="x=$[X_VAL],y=$[Y_VAL],id=$[TCOUNT]", time=1.1, amt=100
+  event = var=VISIT_POINT, val="lastpoint", time=1.2
+}
+//--------------------------------------------------
 // pRealm Config Block
 	
 ProcessConfig = pRealm
@@ -138,12 +137,15 @@ ProcessConfig = pRealm
   hist_var = VISIT_POINT
 }
 //--------------------------------------------------------
+//--------------------------------------------------------
 // pPointAssign Config Block
- ProcessConfig = pPointAssign
+ProcessConfig = pPointAssign
 {
   AppTick   = 4
   CommsTick = 4
 
-  vehicle_name = henry
-  vehicle_name = gilda
+  vname = henry
+  vname = gilda
+
+  assign_by_region = false 
 }
