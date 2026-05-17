@@ -134,6 +134,7 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
         point.set_color("vertex", color);
         point.set_param("vertex_size", "4");
         m_view_points.push_back(point);
+        Notify("VIEW_POINT", point.get_spec());
       }
     }
     else if(key != "APPCAST_REQ") {

@@ -118,7 +118,11 @@ ProcessConfig = pMarineViewer
 // uTimerScript Config Block
 
 ProcessConfig = uTimerScript
-{
+{ 
+  AppTick   = 4
+  CommsTick = 4
+  paused    = false
+
   rand_var = varname=X_VAL, min=-25, max=200, key=at_post, snap=0.1
   rand_var = varname=Y_VAL, min=-175, max=-20, key=at_post, snap=0.1
 

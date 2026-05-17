@@ -21,7 +21,7 @@ set MODE = RETURNING {
   RETURN = true
 } 
 
-set MODE = LOITERING {
+set MODE = MISSIONING {
   MODE = ACTIVE
   LOITER = true
 } 
@@ -36,11 +36,13 @@ Behavior = BHV_Waypoint
 {
   name       = waypt_visit
   pwt        = 100
-  condition  = MODE == MISSION
-  updates    = WPT_UPDATE_$[VNAME]
+  condition  = MODE == MISSIONING
+  updates    = WPT_UPDATE
   perpetual  = true
 
-  point = 0,0
+  speed          = 2.0
+  radius         = 3.0
+
 }
 
 //----------------------------------------------
@@ -107,20 +109,3 @@ Behavior = BHV_Timer
        lead = 8
 }
  //----------------------------------------------
- Behavior = BHV_Timer
- {
-   // General Behavior Parameters
-   // ---------------------------
-   name         = bhv_burning      
-   condition    = MODE==LOITERING
-   duration     = 300
-   perpetual = true
-   
-   duration_reset = REFUEL_NEEDED = false
-   endflag      = REFUEL_NEEDED = true 
-   endflag      = LOITER = false
-   updates      = TIMER_UPDATES        
-
- }
-
-
