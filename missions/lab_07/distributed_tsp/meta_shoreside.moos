@@ -141,7 +141,6 @@ ProcessConfig = pRealm
   hist_var = VISIT_POINT
 }
 //--------------------------------------------------------
-//--------------------------------------------------------
 // pPointAssign Config Block
 ProcessConfig = pPointAssign
 {

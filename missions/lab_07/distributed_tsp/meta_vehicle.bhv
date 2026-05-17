@@ -110,3 +110,20 @@ Behavior = BHV_Timer
        lead = 8
 }
  //----------------------------------------------
+ Behavior = BHV_Timer
+ {
+   // General Behavior Parameters
+   // ---------------------------
+   name         = bhv_burning      
+   condition    = MODE==MISSIONING
+   duration     = 300
+   perpetual = true
+   
+   duration_reset = REFUEL_NEEDED = false
+   endflag      = REFUEL_NEEDED = true 
+   endflag      = LOITER = false
+   updates      = TIMER_UPDATES        
+
+ }
+
+ //----------------------------------------------

@@ -31,7 +31,7 @@ PointAssign::PointAssign()
   m_firstpoint_received = false;
   m_lastpoint_received  = false;
   m_assign_index        = 0;
-  m_assign_by_region    = false; // Ensure this is initialized
+  m_assign_by_region    = false; 
 }
 
 //---------------------------------------------------------
@@ -53,41 +53,24 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     if(key == "VISIT_POINT") {
       string sval = msg.GetString();
       
-      // Guard against an empty configuration using your matching header variable
-      if(m_vehicle_names.empty()) {
-        reportRunWarning("No vehicles configured via 'vname' or 'vehicle_name' in .moos file!");
-        continue;
-      }
-
-      //---------------------------------------------------------
-      // 1. Handle "firstpoint"
-      //---------------------------------------------------------
       if(sval == "firstpoint") {
         m_firstpoint_received = true;
         m_view_points.clear();
         m_assign_index = 0;
 
-        // Forward "firstpoint" to ALL registered vehicles exactly as required
-        for(unsigned int i=0; i<m_vehicle_names.size(); i++) {
-          string vname_upper = to_upper(m_vehicle_names[i]);
-          Notify("VISIT_POINT_" + vname_upper, "firstpoint");
+        for(unsigned int i=0; i<m_vnames.size(); i++) {
+          Notify("VISIT_POINT_" + to_upper(m_vnames[i]), "firstpoint");
         }
       }
-      //---------------------------------------------------------
-      // 2. Handle "lastpoint"
-      //---------------------------------------------------------
+
       else if(sval == "lastpoint") {
         m_lastpoint_received = true;
 
-        for(unsigned int i=0; i<m_vehicle_names.size(); i++) {
-          string vname_upper = to_upper(m_vehicle_names[i]);
-          Notify("VISIT_POINT_" + vname_upper, "lastpoint");
+        for(unsigned int i=0; i<m_vnames.size(); i++) {
+          Notify("VISIT_POINT_" + to_upper(m_vnames[i]), "lastpoint");
         }
       }
-        
-      //---------------------------------------------------------
-      // 3. Handle coordinate points
-      //---------------------------------------------------------
+
       else {
         string xstr  = tokStringParse(sval, "x", ',', '=');
         string ystr  = tokStringParse(sval, "y", ',', '=');
@@ -101,39 +84,33 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
         string target_vname = "";
         string color = "yellow";
 
-        // Determine assignment logic (By Region vs Alternating)
         if(m_assign_by_region) {
-          // East-West split. Total X-span is -25 to 200. Middle line is x = 87.5
           if(x < 87.5) {
-            target_vname = m_vehicle_names[0]; // West vehicle (typically henry)
+            target_vname = m_vnames[0]; 
             color = "yellow";
           } else {
-            // Check if a second vehicle exists, otherwise fallback to the first
-            target_vname = (m_vehicle_names.size() > 1) ? m_vehicle_names[1] : m_vehicle_names[0]; // East vehicle (typically gilda)
+            target_vname = (m_vnames.size() > 1) ? m_vnames[1] : m_vnames[0]; 
             color = "cyan";
           }
         } 
         else {
-          unsigned int v = m_assign_index % m_vehicle_names.size();
-          target_vname = m_vehicle_names[v];
-          m_assign_index++;
-          
+          unsigned int v = m_assign_index % m_vnames.size();
+          target_vname = m_vnames[v];
           color = (v == 0) ? "yellow" : "cyan";
         }
 
-        string target_vname_upper = to_upper(target_vname);
-        string moos_var = "VISIT_POINT_" + target_vname_upper;
+        m_assign_index++;
 
-        // Publish the coordinate to the targeted vehicle
+        string moos_var = "VISIT_POINT_" + to_upper(target_vname);
         string msg_out = "x=" + xstr + ",y=" + ystr + ",id=" + idstr;
         Notify(moos_var, msg_out);
 
-        // Render point inside MarineViewer locally on shoreside
         XYPoint point(x, y);
         point.set_label(idstr);
         point.set_color("vertex", color);
         point.set_param("vertex_size", "4");
         m_view_points.push_back(point);
+        
         Notify("VIEW_POINT", point.get_spec());
       }
     }
@@ -146,8 +123,6 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
 }
 
 //---------------------------------------------------------
-// Procedure: OnConnectToServer()
-
 bool PointAssign::OnConnectToServer()
 {
    registerVariables();
@@ -155,23 +130,14 @@ bool PointAssign::OnConnectToServer()
 }
 
 //---------------------------------------------------------
-// Procedure: Iterate()
-
 bool PointAssign::Iterate()
 {
   AppCastingMOOSApp::Iterate();
-
-  for(unsigned int i=0; i<m_view_points.size(); i++) {
-    Notify("VIEW_POINT", m_view_points[i].get_spec());
-  }
-
   AppCastingMOOSApp::PostReport();
   return(true);
 }
 
 //---------------------------------------------------------
-// Procedure: OnStartUp()
-
 bool PointAssign::OnStartUp()
 {
   AppCastingMOOSApp::OnStartUp();
@@ -188,9 +154,8 @@ bool PointAssign::OnStartUp()
     string value = s;
     bool handled = false;
 
-    // Supports both 'vname' and legacy 'vehicle_name' parameter names
-    if(param == "vname" || param == "vehicle_name") {
-      m_vehicle_names.push_back(value);
+    if(param == "vname") {
+      m_vnames.push_back(value);
       handled = true;
     }
     else if(param == "assign_by_region") {
@@ -207,14 +172,13 @@ bool PointAssign::OnStartUp()
 }
 
 //---------------------------------------------------------
-// Procedure: registerVariables()
-
 void PointAssign::registerVariables()
 {
   AppCastingMOOSApp::RegisterVariables();
   Register("VISIT_POINT", 0);
 }
 
+//---------------------------------------------------------
 void PointAssign::postViewPoint(double x, double y, string label, string color)
 {
    XYPoint point(x, y);
@@ -227,28 +191,26 @@ void PointAssign::postViewPoint(double x, double y, string label, string color)
 }
 
 //------------------------------------------------------------
-// Procedure: buildReport()
-
 bool PointAssign::buildReport()
 {
   m_msgs << "====================================" << endl;
-  m_msgs << "Points received: " << m_assign_index  << endl;
+  m_msgs << "Points received: " << m_assign_index << endl;
   m_msgs << "First point received: " << m_firstpoint_received << endl;
-  m_msgs << "Last point received:  " << m_lastpoint_received  << endl;
+  m_msgs << "Last point received:  " << m_lastpoint_received << endl;
   m_msgs << "====================================" << endl;
 
   ACTable actab(2);
   actab << "Vehicle | Points Assigned";
   actab.addHeaderLines();
 
-  for(unsigned int i=0; i<m_vehicle_names.size(); i++) {
-    int count = 0;
+  for(unsigned int i=0; i<m_vnames.size(); i++) {
     if (m_assign_by_region) {
-      actab << m_vehicle_names[i] << "See Visuals / Log";
+      actab << m_vnames[i] << "See Visuals / Log";
     } else {
-      for(unsigned int j=i; j<m_assign_index; j+=m_vehicle_names.size())
+      int count = 0;
+      for(unsigned int j=i; j<m_assign_index; j+=m_vnames.size())
         count++;
-      actab << m_vehicle_names[i] << count;
+      actab << m_vnames[i] << count;
     }
   }
   m_msgs << actab.getFormattedString();
