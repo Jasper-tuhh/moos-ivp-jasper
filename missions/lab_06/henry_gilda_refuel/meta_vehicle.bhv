@@ -6,6 +6,7 @@ initialize   RETURN  = false
 initialize   STATION_KEEP = false
 initialize   LOITER  = true
 initialize   REFUEL_NEEDED = false
+initialize   AT_START = false
 
 set MODE = ACTIVE {
   DEPLOY = true
@@ -90,13 +91,15 @@ Behavior = BHV_Timer
    // ---------------------------
    name         = bhv_timer      
    condition    = MODE==REFUELING
+   condition    = AT_START     = true
    duration     = 60             
    
    duration_reset = REFUEL_NEEDED = true
    perpetual = true
    
-   endflag      = REFUEL_NEEDED = false 
-   endflag      = LOITER = true 
+   endflag      = AT_START = false 
+   endflag      = LOITER = true
+   endflag      = REFUEL_NEEDED = false
 
    updates      = TIMER_UPDATES        
 
@@ -107,8 +110,10 @@ Behavior = BHV_Timer
   name      = waypt_refuel
   pwt       = 100
   condition = REFUEL_NEEDED = true
+  condition = AT_START =false
   perpetual = true
 
+  endflag = AT_START = true
       speed = 1.3
      radius = 3.0
   nm_radius = 15.0
@@ -116,5 +121,19 @@ Behavior = BHV_Timer
        lead = 8
 }
 
+Behavior = BHV_StationKeep
+{
+  name      = st_keep_refuel
+  pwt       = 100
+  condition = REFUEL_NEEDED = true
+  condition = AT_START = true
 
+  center_activate = true
+     inner_radius = 5
+     outer_radius = 10 
+      outer_speed = 1.0
+    transit_speed = 1.3
+       swing_time = 7
+     visual_hints = vertex_size=0, edge_color=gray50
+}
 
