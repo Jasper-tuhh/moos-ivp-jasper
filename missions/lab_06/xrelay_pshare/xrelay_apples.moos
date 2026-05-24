@@ -11,7 +11,6 @@ ProcessConfig = ANTLER
 
   Run = MOOSDB       @ NewConsole = false
   Run = pXRelay      @ NewConsole = true ~ pXRelay_APPLES
-  Run = pXRelay      @ NewConsole = true ~ pXRelay_PEARS
   Run = uXMS         @ NewConsole = true
   Run = pShare       @ NewConsole = true
 }
@@ -59,7 +58,7 @@ ProcessConfig = pShare
 {
 AppTick = 4
 CommsTick = 4
+
 input = route = localhost:9200 
 output = src_name=APPLES, route=localhost:9201
 }
-
