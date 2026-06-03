@@ -30,7 +30,6 @@ bool GenPath::OnNewMail(MOOSMSG_LIST &NewMail)
     string key    = msg.GetKey();
     string sval   = msg.GetString();
 
-    // 1. Capture vehicle's current position
     if(key == "NAV_X") {
       m_nav_x = msg.GetDouble();
     }
@@ -38,24 +37,27 @@ bool GenPath::OnNewMail(MOOSMSG_LIST &NewMail)
       m_nav_y = msg.GetDouble();
     }
     
-    // 2. Process incoming points from shoreside pPointAssign
+    // cases: 1 - first point sets bool for later report
     else if(key == "VISIT_POINT") {
       if(sval == "firstpoint") {
         m_firstpoint_received = true;
         m_lastpoint_received  = false;
         m_received_points.clear();
       }
+      // cases: 2 - last point sets bool for later report
       else if(sval == "lastpoint") {
         m_lastpoint_received = true;
-        // All points are in! Calculate optimization path
+
         generateAndPublishPath();
       }
+      // cases: 3 - is actual coordinate then parse
       else {
-        // Parse coordinate data: "x=X,y=Y,id=ID"
+        // parse coordinate data: "x=X,y=Y,id=ID"
         string xstr  = tokStringParse(sval, "x", ',', '=');
         string ystr  = tokStringParse(sval, "y", ',', '=');
         string idstr = tokStringParse(sval, "id", ',', '=');
-
+        
+        // debug - in case something goes wrong (AI - proposal!)
         if(!xstr.empty() && !ystr.empty()) {
           XYPoint new_pt(stod(xstr), stod(ystr));
           new_pt.set_label(idstr);
@@ -72,6 +74,7 @@ bool GenPath::OnNewMail(MOOSMSG_LIST &NewMail)
 }
 
 //---------------------------------------------------------
+// void function calculates path according to greedy algorithm and notifies update
 void GenPath::generateAndPublishPath()
 {
   if(m_received_points.empty()) return;
@@ -79,11 +82,9 @@ void GenPath::generateAndPublishPath()
   XYSegList optimized_seglist;
   vector<XYPoint> remaining = m_received_points;
 
-  // Start optimization sorting from where the vehicle currently sits
   double cur_x = m_nav_x;
   double cur_y = m_nav_y;
 
-  // Greedy TSP Algorithm Loop
   while(!remaining.empty()) {
     int best_index = 0;
     double min_dist = -1.0;
@@ -99,18 +100,14 @@ void GenPath::generateAndPublishPath()
       }
     }
 
-    // Append nearest unvisited node to the tour geometry
     optimized_seglist.add_vertex(remaining[best_index].x(), remaining[best_index].y());
     
-    // Update current position stepping stone
     cur_x = remaining[best_index].x();
     cur_y = remaining[best_index].y();
 
-    // Erase it from unvisited cache pool
     remaining.erase(remaining.begin() + best_index);
   }
 
-  // Package tour specification as an update parameter string for BHV_Waypoint
   string update_str = "points = " + optimized_seglist.get_spec();
   Notify("WPT_UPDATE", update_str);
 }

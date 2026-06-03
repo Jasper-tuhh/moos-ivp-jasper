@@ -36,7 +36,7 @@ done
 echo "Launching All MOOS Communities with WARP:" $TIME_WARP
 pAntler shoreside.moos --MOOSTimeWarp=$TIME_WARP >& /dev/null &
 pAntler alpha.moos --MOOSTimeWarp=$TIME_WARP >& /dev/null &
-pAntler bravo.moos --MOOSTimeWarp=$TIME_WARP >& /dev/null &
+# pAntler bravo.moos --MOOSTimeWarp=$TIME_WARP >& /dev/null &
 
 uMAC -t shoreside.moos
 kill -- -$$
