@@ -36,6 +36,7 @@ class PointAssign : public AppCastingMOOSApp
    std::vector<XYPoint> m_points;
    std::vector<XYPoint> m_view_points;
    std::vector<std::string>  m_vnames;
+   std::vector<int>          m_vehicle_counts;
 
  private: // State variables
    bool m_firstpoint_received;

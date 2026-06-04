@@ -16,6 +16,7 @@
 
 using namespace std;
 
+// custom function to create upper case string variables
 std::string to_upper(std::string s)
 {
     std::transform(s.begin(), s.end(), s.begin(),
@@ -50,6 +51,8 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
     CMOOSMsg &msg = *p;
     string key    = msg.GetKey();
 
+// When new messages arrive in the MOOSDB the content gets checked for the 
+// indicator "VISIT_POINT", first and last point get special treatment
     if(key == "VISIT_POINT") {
       string sval = msg.GetString();
       
@@ -57,7 +60,10 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
         m_firstpoint_received = true;
         m_view_points.clear();
         m_assign_index = 0;
-
+        m_vehicle_counts.assign(m_vnames.size(), 0);
+        
+// Custom Function to_upper is invoked to notify the right vessel with the 
+// respective points
         for(unsigned int i=0; i<m_vnames.size(); i++) {
           Notify("VISIT_POINT_" + to_upper(m_vnames[i]), "firstpoint");
         }
@@ -70,7 +76,8 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
           Notify("VISIT_POINT_" + to_upper(m_vnames[i]), "lastpoint");
         }
       }
-
+      
+// coordinates are parsed with respect to their x, y and id
       else {
         string xstr  = tokStringParse(sval, "x", ',', '=');
         string ystr  = tokStringParse(sval, "y", ',', '=');
@@ -78,29 +85,38 @@ bool PointAssign::OnNewMail(MOOSMSG_LIST &NewMail)
 
         if(xstr.empty() || ystr.empty()) continue;
 
+// The parsed value possesses the wrong type, which is conversed to double
         double x = stod(xstr);
         double y = stod(ystr);
         
         string target_vname = "";
         string color = "yellow";
-
+        
+        int chosen_index = 0;
+        
+// Depending on the assign by region value provided in the configuration the
+// coloration is determined
         if(m_assign_by_region) {
           if(x < 87.5) {
-            target_vname = m_vnames[0]; 
-            color = "yellow";
+            chosen_index = 0; 
+              target_vname = m_vnames[chosen_index]; 
+              color = "yellow";
           } else {
-            target_vname = (m_vnames.size() > 1) ? m_vnames[1] : m_vnames[0]; 
-            color = "cyan";
+            chosen_index = (m_vnames.size() > 1) ? 1 : 0; 
+              target_vname = m_vnames[chosen_index]; 
+              color = "cyan";
           }
         } 
         else {
-          unsigned int v = m_assign_index % m_vnames.size();
-          target_vname = m_vnames[v];
-          color = (v == 0) ? "yellow" : "cyan";
+          chosen_index = m_assign_index % m_vnames.size();
+          target_vname = m_vnames[chosen_index];
+          m_assign_index++;
+          color = (chosen_index == 0) ? "yellow" : "cyan";
         }
 
-        m_assign_index++;
+        m_vehicle_counts[chosen_index]++;
 
+// VISIT_POINT gets assigned a vessel with upper case function
         string moos_var = "VISIT_POINT_" + to_upper(target_vname);
         string msg_out = "x=" + xstr + ",y=" + ystr + ",id=" + idstr;
         Notify(moos_var, msg_out);
@@ -199,20 +215,22 @@ bool PointAssign::buildReport()
   m_msgs << "Last point received:  " << m_lastpoint_received << endl;
   m_msgs << "====================================" << endl;
 
+// AppCasting Table to show in the terminal, with the vehicle and the points
+
   ACTable actab(2);
   actab << "Vehicle | Points Assigned";
   actab.addHeaderLines();
 
-  for(unsigned int i=0; i<m_vnames.size(); i++) {
-    if (m_assign_by_region) {
-      actab << m_vnames[i] << "See Visuals / Log";
-    } else {
-      int count = 0;
-      for(unsigned int j=i; j<m_assign_index; j+=m_vnames.size())
-        count++;
-      actab << m_vnames[i] << count;
+  if(m_vehicle_counts.size() == m_vnames.size()) {
+    for(unsigned int i=0; i<m_vnames.size(); i++) {
+      actab << m_vnames[i] << m_vehicle_counts[i];
+    }
+  } else {
+    for(unsigned int i=0; i<m_vnames.size(); i++) {
+      actab << m_vnames[i] << 0;
     }
   }
+
   m_msgs << actab.getFormattedString();
   return(true);
 }

@@ -74,20 +74,27 @@ bool GenPath::OnNewMail(MOOSMSG_LIST &NewMail)
 }
 
 //---------------------------------------------------------
-// void function calculates path according to greedy algorithm and notifies update
+// void function calculates path according to greedy algorithm 
+// and notifies update
+
 void GenPath::generateAndPublishPath()
 {
   if(m_received_points.empty()) return;
 
+// initialise points and segments
   XYSegList optimized_seglist;
   vector<XYPoint> remaining = m_received_points;
 
   double cur_x = m_nav_x;
   double cur_y = m_nav_y;
-
+  
+// traveling salesperson algorithm
   while(!remaining.empty()) {
     int best_index = 0;
     double min_dist = -1.0;
+    
+// finding the shortest distance between current position 
+// and the remaining points
 
     for(unsigned int i = 0; i < remaining.size(); i++) {
       double dx = remaining[i].x() - cur_x;
@@ -99,7 +106,8 @@ void GenPath::generateAndPublishPath()
         best_index = i;
       }
     }
-
+    
+// creating the optimised path 
     optimized_seglist.add_vertex(remaining[best_index].x(), remaining[best_index].y());
     
     cur_x = remaining[best_index].x();
@@ -107,6 +115,9 @@ void GenPath::generateAndPublishPath()
 
     remaining.erase(remaining.begin() + best_index);
   }
+  
+// publish the segments as string variable in waypoint update to be 
+// received by waypoint behavior 
 
   string update_str = "points = " + optimized_seglist.get_spec();
   Notify("WPT_UPDATE", update_str);
@@ -153,6 +164,10 @@ void GenPath::registerVariables()
 //------------------------------------------------------------
 bool GenPath::buildReport() 
 {
+
+// create a report in the user interface based on the number of received points 
+// and boolean variable
+
   m_msgs << "============================================" << endl;
   m_msgs << " Points Stored: " << m_received_points.size() << endl;
   m_msgs << " Sequence Ready: " << (m_lastpoint_received ? "YES" : "NO") << endl;

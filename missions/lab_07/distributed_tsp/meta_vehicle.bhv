@@ -40,6 +40,8 @@ Behavior = BHV_Waypoint
   condition  = MODE == MISSIONING
   updates    = WPT_UPDATE
   perpetual  = true
+  
+  endflag      = RETURN = true
 
   // point         = 100,-100
   speed          = 2.0

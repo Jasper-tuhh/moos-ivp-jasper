@@ -123,9 +123,10 @@ ProcessConfig = uTimerScript
   CommsTick = 4
   paused    = false
 
+// random values are created within a predefined range
   rand_var = varname=X_VAL, min=-25, max=200, key=at_post, snap=0.1
   rand_var = varname=Y_VAL, min=-175, max=-20, key=at_post, snap=0.1
-
+// events are triggered in sequence at certain times in the process
   event = var=VISIT_POINT, val="firstpoint", time=1
   event = var=VISIT_POINT, val="x=$[X_VAL],y=$[Y_VAL],id=$[TCOUNT]", time=1.1, amt=100
   event = var=VISIT_POINT, val="lastpoint", time=1.2
@@ -150,5 +151,5 @@ ProcessConfig = pPointAssign
   vname = henry
   vname = gilda
 
-  assign_by_region = true 
+  assign_by_region = false 
 }

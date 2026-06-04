@@ -13,7 +13,9 @@ TrackPath::TrackPath()
 {
   m_firstpoint_received = false;
   m_lastpoint_received  = false;
+  // new variable with default value 5m 
   m_visit_radius       = 5.0;
+  // new boolean for regenerating path
   m_regenerate_pending = false;
   m_nav_x = 0.0;
   m_nav_y = 0.0;
@@ -31,7 +33,7 @@ bool TrackPath::OnNewMail(MOOSMSG_LIST &NewMail)
     CMOOSMsg &msg = *p;
     string key    = msg.GetKey();
     string sval   = msg.GetString();
-
+// Similar to generate path
     if(key == "NAV_X") {
       m_nav_x = msg.GetDouble();
       checkVisits();
@@ -39,31 +41,33 @@ bool TrackPath::OnNewMail(MOOSMSG_LIST &NewMail)
     else if(key == "NAV_Y") {
       m_nav_y = msg.GetDouble();
     }
+// New variable, for the message GENPATH_REGENERATE 
+// the bool is set to true
     else if(key == "GENPATH_REGENERATE") {
     m_regenerate_pending = true;
     }
     
-    // cases: 1 - first point sets bool for later report
+// first point sets bool for later report
     else if(key == "VISIT_POINT") {
       if(sval == "firstpoint") {
         m_firstpoint_received = true;
         m_lastpoint_received  = false;
         m_unvisited_points.clear();
       }
-      // cases: 2 - last point sets bool for later report
+// last point sets bool for later report
       else if(sval == "lastpoint") {
         m_all_points      = m_unvisited_points ;
         
         generateAndPublishPath();
       }
-      // cases: 3 - is actual coordinate then parse
+// parse coordinates
       else {
         // parse coordinate data: "x=X,y=Y,id=ID"
         string xstr  = tokStringParse(sval, "x", ',', '=');
         string ystr  = tokStringParse(sval, "y", ',', '=');
         string idstr = tokStringParse(sval, "id", ',', '=');
         
-        // debug - in case something goes wrong (AI - proposal!)
+// debug (AI - proposal!)
         if(!xstr.empty() && !ystr.empty()) {
           XYPoint new_pt(stod(xstr), stod(ystr));
           new_pt.set_label(idstr);
@@ -84,7 +88,8 @@ bool TrackPath::OnNewMail(MOOSMSG_LIST &NewMail)
 void TrackPath::generateAndPublishPath()
 {
   if(m_unvisited_points.empty()) return;
-
+  
+// similar to the path generation
   XYSegList optimized_seglist;
   vector<XYPoint> remaining = m_unvisited_points;
 
@@ -105,7 +110,7 @@ void TrackPath::generateAndPublishPath()
         best_index = i;
       }
     }
-
+// (see path generation)
     optimized_seglist.add_vertex(remaining[best_index].x(), remaining[best_index].y());
     
     cur_x = remaining[best_index].x();
@@ -113,11 +118,13 @@ void TrackPath::generateAndPublishPath()
 
     remaining.erase(remaining.begin() + best_index);
   }
-
+// Updates waypoint with parsed coordinates
   string update_str = "points = " + optimized_seglist.get_spec();
   Notify("WPT_UPDATE", update_str);
 }
 
+// void function calculates distances between current position and remaining
+// points
 void TrackPath::checkVisits()
 {
   vector<XYPoint> still_unvisited;
@@ -139,6 +146,12 @@ bool TrackPath::OnConnectToServer()
 }
 
 //---------------------------------------------------------
+
+// bool checks if regeneration is necessary, if yes set to false and proceed 
+// with updating  if there are no points, that have still not been visited 
+// -> then set GENPATH to complete, else publish the path, that is determined 
+// with generate function
+
 bool TrackPath::Iterate()
 {
     AppCastingMOOSApp::Iterate();
@@ -172,6 +185,8 @@ bool TrackPath::OnStartUp()
     string orig  = *q;
     string param = toupper(biteStringX(orig, '='));
     string value = orig;
+    
+// New Radius variable, that is parsed from string to double 
     if(param == "VISIT_RADIUS")
       m_visit_radius = stod(value);
     else
@@ -199,8 +214,7 @@ bool TrackPath::buildReport()
     m_msgs << " Visit radius : " << m_visit_radius << " m\n";
     m_msgs << " Total points : " << m_all_points.size()      << "\n";
     m_msgs << " Unvisited    : " << m_unvisited_points.size() << "\n";
-    m_msgs << " Visited      : "
-           << m_all_points.size() - m_unvisited_points.size() << "\n";
+    m_msgs << " Visited      : " << m_all_points.size() - m_unvisited_points.size() << "\n";
     m_msgs << "============================================\n";
     return(true);
 }
